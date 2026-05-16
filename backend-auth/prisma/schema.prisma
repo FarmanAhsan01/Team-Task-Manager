@@ -1,0 +1,381 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============== ENUMS ==============
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  LEAD
+  DEVELOPER
+  MEMBER
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  TESTING
+  COMPLETED
+  BLOCKED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  DEADLINE_APPROACHING
+  OVERDUE_TASK
+  MENTIONED
+  COMMENT
+  TEAM_INVITE
+  PROJECT_UPDATE
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  DELETED
+  ASSIGNED
+  COMMENTED
+  STATUS_CHANGED
+  PRIORITY_CHANGED
+  MOVED
+  JOINED
+  LEFT
+  INVITED
+}
+
+enum EntityType {
+  TASK
+  PROJECT
+  TEAM
+  USER
+  COMMENT
+}
+
+// ============== CORE MODELS ==============
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique @db.VarChar(255)
+  name          String    @db.VarChar(255)
+  password      String    @db.VarChar(255)
+  avatar        String?
+  role          UserRole  @default(DEVELOPER)
+  status        UserStatus @default(ACTIVE)
+  bio           String?
+  
+  // Relations
+  teamsMembership  TeamMember[]
+  teamsCreated     Team[] @relation("teamCreator")
+  projectsCreated  Project[] @relation("projectCreator")
+  tasksCreated     Task[] @relation("taskCreator")
+  tasksAssigned    Task[] @relation("taskAssignee")
+  comments         Comment[]
+  activityLogs     ActivityLog[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model Team {
+  id            String    @id @default(cuid())
+  name          String    @db.VarChar(255)
+  description   String?   @db.Text
+  avatar        String?
+  workspace     String?   @db.VarChar(255)
+  
+  createdBy     String
+  creator       User      @relation("teamCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  status        String    @default("ACTIVE")
+  
+  // Relations
+  members       TeamMember[]
+  projects      Project[]
+  activityLogs  ActivityLog[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([createdBy])
+  @@index([status])
+}
+
+model TeamMember {
+  id            String    @id @default(cuid())
+  teamId        String
+  team          Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role          UserRole  @default(DEVELOPER)
+  joinedAt      DateTime  @default(now())
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model Project {
+  id            String    @id @default(cuid())
+  name          String    @db.VarChar(255)
+  description   String?   @db.Text
+  
+  teamId        String
+  team          Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  createdBy     String
+  creator       User      @relation("projectCreator", fields: [createdBy], references: [id])
+  
+  status        ProjectStatus @default(ACTIVE)
+  priority      Priority  @default(MEDIUM)
+  
+  startDate     DateTime?
+  deadline      DateTime?
+  
+  // Relations
+  tasks         Task[]
+  activityLogs  ActivityLog[]
+  analytics     Analytics[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([teamId])
+  @@index([createdBy])
+  @@index([status])
+}
+
+model Task {
+  id            String    @id @default(cuid())
+  title         String    @db.VarChar(255)
+  description   String?   @db.Text
+  
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  createdBy     String
+  creator       User      @relation("taskCreator", fields: [createdBy], references: [id])
+  
+  assignedTo    String?
+  assignee      User?     @relation("taskAssignee", fields: [assignedTo], references: [id])
+  
+  status        TaskStatus @default(TODO)
+  priority      Priority   @default(MEDIUM)
+  
+  dueDate       DateTime?
+  estimatedHours Float?
+  actualHours   Float?
+  completedAt   DateTime?
+  
+  // Smart prioritization
+  priorityScore Float    @default(0)
+  
+  // Features
+  labels        String[]
+  attachments   String[]
+  
+  // Relations
+  dependencies  TaskDependency[] @relation("taskDependencies")
+  dependsOn     TaskDependency[] @relation("taskDependsOn")
+  comments      Comment[]
+  activityLogs  ActivityLog[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([projectId])
+  @@index([createdBy])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([priority])
+  @@index([priorityScore])
+  @@index([dueDate])
+}
+
+model TaskDependency {
+  id                String    @id @default(cuid())
+  taskId            String
+  task              Task      @relation("taskDependencies", fields: [taskId], references: [id], onDelete: Cascade)
+  
+  dependsOnTaskId   String
+  dependsOnTask     Task      @relation("taskDependsOn", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+  
+  blockedReason     String?
+
+  @@unique([taskId, dependsOnTaskId])
+  @@index([taskId])
+  @@index([dependsOnTaskId])
+}
+
+model Comment {
+  id            String    @id @default(cuid())
+  content       String    @db.Text
+  
+  taskId        String
+  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  
+  mentions      String[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+model ActivityLog {
+  id            String    @id @default(cuid())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  
+  action        ActivityAction
+  entityType    EntityType
+  entityId      String
+  
+  teamId        String?
+  team          Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  taskId        String?
+  task          Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  
+  changes       Json?
+  description   String?
+  
+  timestamp     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([projectId])
+  @@index([taskId])
+  @@index([timestamp])
+}
+
+model Notification {
+  id            String    @id @default(cuid())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type          NotificationType
+  title         String    @db.VarChar(255)
+  message       String    @db.Text
+  
+  relatedEntityId String?
+  relatedEntityType EntityType?
+  
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model Analytics {
+  id            String    @id @default(cuid())
+  
+  teamId        String?
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  date          DateTime  @default(now())
+  
+  completedTasks    Int   @default(0)
+  totalTasks        Int   @default(0)
+  avgCompletionTime Float?
+  teamVelocity      Float?
+  overdueTasks      Int   @default(0)
+  
+  completionRate    Float @default(0)
+  burndownData      Json?
+  
+  createdAt     DateTime  @default(now())
+
+  @@index([projectId])
+  @@index([date])
+}
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  
+  action        String
+  resource      String
+  resourceId    String?
+  
+  changes       Json?
+  
+  ipAddress     String?
+  userAgent     String?
+  
+  timestamp     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// Optional: AI Recommendations Model for future use
+model AIRecommendation {
+  id            String    @id @default(cuid())
+  projectId     String
+  
+  type          String  // "TASK_ASSIGNMENT", "PRIORITY_ADJUSTMENT", "DEADLINE_WARNING"
+  title         String
+  description   String  @db.Text
+  confidence    Float   // 0-1 confidence score
+  
+  recommendation Json
+  
+  appliedAt     DateTime?
+  
+  createdAt     DateTime  @default(now())
+}

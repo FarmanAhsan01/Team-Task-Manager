@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: Backend Auth API
+  version: 1.0.0
+paths:
+  /api/v1/users/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+      responses:
+        '201':
+          description: Created
+  /api/v1/users/login:
+    post:
+      summary: Login user
+      responses:
+        '200':
+          description: OK

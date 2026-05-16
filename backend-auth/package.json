@@ -1,0 +1,40 @@
+{
+  "name": "backend-auth",
+  "version": "2.0.0",
+  "description": "Engineering-grade project management backend",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
+    "prisma:studio": "prisma studio",
+    "docker:build": "docker build -t taskforge-backend .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "@prisma/config": "^7.8.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^7.8.0"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "bcrypt": "^6.0.0",
+    "bull": "^4.12.2",
+    "cloudinary": "^1.40.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.20.0",
+    "redis": "^4.6.12",
+    "socket.io": "^4.8.3",
+    "winston": "^3.11.0"
+  }
+}

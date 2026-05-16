@@ -1,0 +1,211 @@
+// Role-based Access Control
+export const ROLES = {
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  LEAD: 'LEAD',
+  DEVELOPER: 'DEVELOPER',
+  VIEWER: 'VIEWER',
+};
+
+export const ROLE_HIERARCHY = {
+  ADMIN: 5,
+  MANAGER: 4,
+  LEAD: 3,
+  DEVELOPER: 2,
+  VIEWER: 1,
+};
+
+// Task Status
+export const TASK_STATUS = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  IN_REVIEW: 'IN_REVIEW',
+  TESTING: 'TESTING',
+  COMPLETED: 'COMPLETED',
+  BLOCKED: 'BLOCKED',
+};
+
+// Priority Levels
+export const PRIORITY = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+};
+
+export const PRIORITY_VALUES = {
+  LOW: 1,
+  MEDIUM: 2,
+  HIGH: 3,
+  CRITICAL: 4,
+};
+
+// Project Status
+export const PROJECT_STATUS = {
+  PLANNING: 'PLANNING',
+  ACTIVE: 'ACTIVE',
+  ON_HOLD: 'ON_HOLD',
+  COMPLETED: 'COMPLETED',
+  ARCHIVED: 'ARCHIVED',
+};
+
+// User Status
+export const USER_STATUS = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  SUSPENDED: 'SUSPENDED',
+};
+
+// Activity Actions
+export const ACTIVITY_ACTIONS = {
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED',
+  DELETED: 'DELETED',
+  ASSIGNED: 'ASSIGNED',
+  COMMENTED: 'COMMENTED',
+  STATUS_CHANGED: 'STATUS_CHANGED',
+  PRIORITY_CHANGED: 'PRIORITY_CHANGED',
+  MOVED: 'MOVED',
+  JOINED: 'JOINED',
+  LEFT: 'LEFT',
+  INVITED: 'INVITED',
+};
+
+// Notification Types
+export const NOTIFICATION_TYPES = {
+  TASK_ASSIGNED: 'TASK_ASSIGNED',
+  TASK_COMPLETED: 'TASK_COMPLETED',
+  DEADLINE_APPROACHING: 'DEADLINE_APPROACHING',
+  OVERDUE_TASK: 'OVERDUE_TASK',
+  MENTIONED: 'MENTIONED',
+  COMMENT: 'COMMENT',
+  TEAM_INVITE: 'TEAM_INVITE',
+  PROJECT_UPDATE: 'PROJECT_UPDATE',
+};
+
+// RBAC Permissions
+export const PERMISSIONS = {
+  // Team Permissions
+  CREATE_TEAM: 'CREATE_TEAM',
+  DELETE_TEAM: 'DELETE_TEAM',
+  MANAGE_TEAM: 'MANAGE_TEAM',
+
+  // Project Permissions
+  CREATE_PROJECT: 'CREATE_PROJECT',
+  DELETE_PROJECT: 'DELETE_PROJECT',
+  UPDATE_PROJECT: 'UPDATE_PROJECT',
+
+  // Task Permissions
+  CREATE_TASK: 'CREATE_TASK',
+  UPDATE_TASK: 'UPDATE_TASK',
+  DELETE_TASK: 'DELETE_TASK',
+  ASSIGN_TASK: 'ASSIGN_TASK',
+
+  // Member Permissions
+  INVITE_MEMBERS: 'INVITE_MEMBERS',
+  REMOVE_MEMBERS: 'REMOVE_MEMBERS',
+
+  // Analytics
+  VIEW_ANALYTICS: 'VIEW_ANALYTICS',
+
+  // Settings
+  MANAGE_SETTINGS: 'MANAGE_SETTINGS',
+};
+
+// Role-Permission Matrix
+export const ROLE_PERMISSIONS = {
+  ADMIN: Object.values(PERMISSIONS),
+  MANAGER: [
+    PERMISSIONS.CREATE_PROJECT,
+    PERMISSIONS.UPDATE_PROJECT,
+    PERMISSIONS.DELETE_PROJECT,
+    PERMISSIONS.CREATE_TASK,
+    PERMISSIONS.UPDATE_TASK,
+    PERMISSIONS.DELETE_TASK,
+    PERMISSIONS.ASSIGN_TASK,
+    PERMISSIONS.INVITE_MEMBERS,
+    PERMISSIONS.VIEW_ANALYTICS,
+  ],
+  LEAD: [
+    PERMISSIONS.CREATE_TASK,
+    PERMISSIONS.UPDATE_TASK,
+    PERMISSIONS.DELETE_TASK,
+    PERMISSIONS.ASSIGN_TASK,
+    PERMISSIONS.VIEW_ANALYTICS,
+  ],
+  DEVELOPER: [
+    PERMISSIONS.CREATE_TASK,
+    PERMISSIONS.UPDATE_TASK,
+  ],
+  VIEWER: [],
+};
+
+// Token Expiry
+export const TOKEN_EXPIRY = {
+  ACCESS: '15m',
+  REFRESH: '7d',
+};
+
+// Pagination
+export const DEFAULT_PAGE_SIZE = 20;
+export const MAX_PAGE_SIZE = 100;
+
+// Task Prioritization Weights
+export const PRIORITY_WEIGHTS = {
+  DEADLINE_URGENCY: 0.4,    // 40%
+  COMPLEXITY: 0.3,          // 30%
+  DEPENDENCIES: 0.2,        // 20%
+  SEVERITY: 0.1,            // 10%
+};
+
+// Workload Thresholds
+export const WORKLOAD_THRESHOLDS = {
+  LOW: 10,
+  MEDIUM: 20,
+  HIGH: 30,
+  CRITICAL: 40,
+};
+
+// Error Messages
+export const ERROR_MESSAGES = {
+  INVALID_CREDENTIALS: 'Invalid email or password',
+  USER_NOT_FOUND: 'User not found',
+  USER_ALREADY_EXISTS: 'User already exists',
+  UNAUTHORIZED: 'Unauthorized access',
+  FORBIDDEN: 'Access forbidden',
+  NOT_FOUND: 'Resource not found',
+  VALIDATION_ERROR: 'Validation error',
+  INTERNAL_SERVER_ERROR: 'Internal server error',
+  DUPLICATE_EMAIL: 'Email already registered',
+  WEAK_PASSWORD: 'Password must be at least 8 characters',
+};
+
+// Success Messages
+export const SUCCESS_MESSAGES = {
+  USER_CREATED: 'User created successfully',
+  USER_LOGGED_IN: 'User logged in successfully',
+  USER_LOGGED_OUT: 'User logged out successfully',
+  TEAM_CREATED: 'Team created successfully',
+  PROJECT_CREATED: 'Project created successfully',
+  TASK_CREATED: 'Task created successfully',
+};
+
+export default {
+  ROLES,
+  ROLE_HIERARCHY,
+  TASK_STATUS,
+  PRIORITY,
+  PROJECT_STATUS,
+  USER_STATUS,
+  ACTIVITY_ACTIONS,
+  NOTIFICATION_TYPES,
+  PERMISSIONS,
+  ROLE_PERMISSIONS,
+  TOKEN_EXPIRY,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  PRIORITY_WEIGHTS,
+  WORKLOAD_THRESHOLDS,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+};
