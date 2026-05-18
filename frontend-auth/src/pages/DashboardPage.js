@@ -190,7 +190,7 @@ const DashboardPage = () => {
             Admin Dashboard <span className="text-brand-500">Live</span> ⚡
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Welcome back, {user?.name}! You are managing **{activeProject?.name || 'All Projects'}**.
+            Welcome back, {user?.name}! You are managing <strong>{activeProject?.name || 'All Projects'}</strong>.
           </p>
         </motion.div>
 
