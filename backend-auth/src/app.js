@@ -41,6 +41,10 @@ app.use(cookieParser());
 
 // ============== ROUTES ==============
 
+app.get("/", (req, res) => {
+  res.json(formatResponse({ status: "ok" }, "TaskForge API is running"));
+});
+
 // Health Check
 app.get("/api/v1/health", (req, res) => {
   res.json(formatResponse({ status: "ok" }, "Server is healthy"));
